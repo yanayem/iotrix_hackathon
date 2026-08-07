@@ -7,10 +7,10 @@
 // =====================================================
 // WIFI & FIREBASE CONFIG
 // =====================================================
-#define WIFI_SSID "YOUR_WIFI_NAME"
-#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
-#define FIREBASE_HOST "your-project-id.firebaseio.com"
-#define FIREBASE_AUTH "YOUR_FIREBASE_SECRET"
+#define WIFI_SSID "Cafeteria"
+#define WIFI_PASSWORD "bubt1234"
+#define FIREBASE_HOST "iotrix-hackathon-d0919-default-rtdb.firebaseio.com"
+#define FIREBASE_AUTH "O7nB9c0kCv6bASM4h5Dl7AF6VovLVZeIdZgXLQ7G"
 
 FirebaseData firebaseData;
 FirebaseConfig config;
