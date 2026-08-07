@@ -14,73 +14,55 @@
 </head>
 <body class="bg-gray-900 text-white font-sans">
     <!-- Gas Alert Banner -->
-    <div id="gasBanner" class="hidden bg-red-600 text-white
-text-center py-3 font-bold text-xl animate-pulse">
+    <div id="gasBanner" class="hidden bg-red-600 text-white text-center py-3 font-bold text-xl animate-pulse">
         ⚠️ GAS LEAK DETECTED! PLEASE EVACUATE! ⚠️
     </div>
 
     <div class="min-h-screen flex flex-col items-center p-6">
-        <h1 class="text-4xl font-bold my-8 text-blue-400">Smart
-Parking System Dashboard</h1>
+        <h1 class="text-4xl font-bold my-8 text-blue-400">Smart Parking System Dashboard</h1>
 
         <!-- Slot Status Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
             <!-- Slot A -->
-            <div id="cardA" class="bg-gray-800 p-8 rounded-2xl
-shadow-lg border-t-4 border-green-500 transition-all duration-500">
-                <h2 class="text-2xl font-semibold mb-4
-text-center">Parking Slot A</h2>
-                <div id="statusA" class="text-5xl font-black
-text-center text-green-500">EMPTY</div>
+            <div id="cardA" class="bg-gray-800 p-8 rounded-2xl shadow-lg border-t-4 border-green-500 transition-all duration-500">
+                <h2 class="text-2xl font-semibold mb-4 text-center">Parking Slot A</h2>
+                <div id="statusA" class="text-5xl font-black text-center text-green-500">EMPTY</div>
             </div>
 
             <!-- Slot B -->
-            <div id="cardB" class="bg-gray-800 p-8 rounded-2xl
-shadow-lg border-t-4 border-green-500 transition-all duration-500">
-                <h2 class="text-2xl font-semibold mb-4
-text-center">Parking Slot B</h2>
-                <div id="statusB" class="text-5xl font-black
-text-center text-green-500">EMPTY</div>
+            <div id="cardB" class="bg-gray-800 p-8 rounded-2xl shadow-lg border-t-4 border-green-500 transition-all duration-500">
+                <h2 class="text-2xl font-semibold mb-4 text-center">Parking Slot B</h2>
+                <div id="statusB" class="text-5xl font-black text-center text-green-500">EMPTY</div>
             </div>
         </div>
 
         <!-- Live Info Cards -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 w-full
-max-w-4xl">
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
             <div class="bg-gray-800 p-6 rounded-xl text-center shadow-md">
-                <p class="text-gray-400 uppercase text-sm font-bold
-tracking-wider">Free Slots</p>
+                <p class="text-gray-400 uppercase text-sm font-bold tracking-wider">Free Slots</p>
                 <p id="freeSlots" class="text-4xl font-bold text-blue-400">2</p>
                 <p class="text-xs text-gray-500 mt-1">out of 2 total</p>
             </div>
             <div class="bg-gray-800 p-6 rounded-xl text-center shadow-md">
-                <p class="text-gray-400 uppercase text-sm font-bold
-tracking-wider">Gate Status</p>
-                <p id="gateStatus" class="text-4xl font-bold
-text-red-500">CLOSED</p>
+                <p class="text-gray-400 uppercase text-sm font-bold tracking-wider">Gate Status</p>
+                <p id="gateStatus" class="text-4xl font-bold text-red-500">CLOSED</p>
             </div>
             <div class="bg-gray-800 p-6 rounded-xl text-center shadow-md">
-                <p class="text-gray-400 uppercase text-sm font-bold
-tracking-wider">System Status</p>
-                <p id="systemStatus" class="text-2xl font-bold
-text-green-400">ONLINE</p>
+                <p class="text-gray-400 uppercase text-sm font-bold tracking-wider">System Status</p>
+                <p id="systemStatus" class="text-2xl font-bold text-green-400">ONLINE</p>
             </div>
         </div>
 
         <!-- Live Activity Log -->
         <div class="mt-12 w-full max-w-4xl">
-            <h3 class="text-2xl font-bold mb-4 text-blue-300">Live
-Entry Logs</h3>
+            <h3 class="text-2xl font-bold mb-4 text-blue-300">Live Entry Logs</h3>
             <div class="bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-gray-700">
                         <tr>
-                            <th class="p-4 font-semibold
-text-gray-300">Time</th>
-                            <th class="p-4 font-semibold
-text-gray-300">Card ID</th>
-                            <th class="p-4 font-semibold
-text-gray-300">Status</th>
+                            <th class="p-4 font-semibold text-gray-300">Time</th>
+                            <th class="p-4 font-semibold text-gray-300">Card ID</th>
+                            <th class="p-4 font-semibold text-gray-300">Status</th>
                         </tr>
                     </thead>
                     <tbody id="logTableBody">
@@ -92,16 +74,10 @@ text-gray-300">Status</th>
     </div>
 
     <!-- Notification Toast -->
-    <div id="notification" class="fixed bottom-10 right-10 transform
-translate-y-20 transition-transform duration-500 bg-blue-600
-text-white p-4 rounded-lg shadow-2xl flex items-center space-x-3
-pointer-events-none opacity-0">
+    <div id="notification" class="fixed bottom-10 right-10 transform translate-y-20 transition-transform duration-500 bg-blue-600 text-white p-4 rounded-lg shadow-2xl flex items-center space-x-3 pointer-events-none opacity-0">
         <div class="bg-white text-blue-600 rounded-full p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
-fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0
-0118 0z" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
         <div>
@@ -116,7 +92,7 @@ stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "your-project-id.firebaseapp.com",
-            databaseURL: "https://your-project-id.firebaseio.com",
+            databaseURL: "https://iotrix-hackathon-d0919-default-rtdb.firebaseio.com/",
             projectId: "your-project-id",
             storageBucket: "your-project-id.appspot.com",
             messagingSenderId: "YOUR_SENDER_ID",
@@ -141,8 +117,7 @@ stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0
                 // 2. Update Gate Status
                 const gate = document.getElementById('gateStatus');
                 gate.innerText = data.gateOpen ? "OPEN" : "CLOSED";
-                gate.className = `text-4xl font-bold ${data.gateOpen ?
-'text-green-500' : 'text-red-500'}`;
+                gate.className = `text-4xl font-bold ${data.gateOpen ? 'text-green-500' : 'text-red-500'}`;
 
                 // 3. Update Free Slots Count
                 document.getElementById('freeSlots').innerText = data.freeSlots;
@@ -156,10 +131,8 @@ stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0
                 }
 
                 // 5. Live Notification for RFID Entry
-                if (data.recentEntry && data.recentEntry.timestamp >
-lastEntryTime) {
-                    showNotification(`Car (ID:
-${data.recentEntry.cardID}) entered the lot!`);
+                if (data.recentEntry && data.recentEntry.timestamp > lastEntryTime) {
+                    showNotification(`Car (ID: ${data.recentEntry.cardID}) entered the lot!`);
                     lastEntryTime = data.recentEntry.timestamp;
                 }
 
@@ -168,23 +141,18 @@ ${data.recentEntry.cardID}) entered the lot!`);
                     const logBody = document.getElementById('logTableBody');
                     logBody.innerHTML = '';
 
-                    // Convert logs object to array and sort by time
-(assuming time is a string or number)
+                    // Convert logs object to array and sort by time (assuming time is a string or number)
                     // For better sorting, use a timestamp if available
-                    const logsArray =
-Object.values(data.logs).reverse().slice(0, 10); // Show last 10
+                    const logsArray = Object.values(data.logs).reverse().slice(0, 10); // Show last 10
 
                     logsArray.forEach(log => {
                         const row = document.createElement('tr');
-                        row.className = "border-t border-gray-700
-hover:bg-gray-750 transition-colors fade-in";
+                        row.className = "border-t border-gray-700 hover:bg-gray-750 transition-colors fade-in";
                         row.innerHTML = `
                             <td class="p-4 text-gray-400">${log.time}</td>
                             <td class="p-4 font-mono">${log.cardID}</td>
                             <td class="p-4">
-                                <span class="px-2 py-1 rounded text-xs
-font-bold ${log.status === 'allowed' ? 'bg-green-900 text-green-300' :
-'bg-red-900 text-red-300'}">
+                                <span class="px-2 py-1 rounded text-xs font-bold ${log.status === 'allowed' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">
                                     ${log.status.toUpperCase()}
                                 </span>
                             </td>
@@ -201,16 +169,12 @@ font-bold ${log.status === 'allowed' ? 'bg-green-900 text-green-300' :
 
             if (isOccupied) {
                 status.innerText = "OCCUPIED";
-                status.className = "text-5xl font-black text-center
-text-red-500";
-                card.className = "bg-gray-800 p-8 rounded-2xl
-shadow-lg border-t-4 border-red-500 transition-all duration-500";
+                status.className = "text-5xl font-black text-center text-red-500";
+                card.className = "bg-gray-800 p-8 rounded-2xl shadow-lg border-t-4 border-red-500 transition-all duration-500";
             } else {
                 status.innerText = "EMPTY";
-                status.className = "text-5xl font-black text-center
-text-green-500";
-                card.className = "bg-gray-800 p-8 rounded-2xl
-shadow-lg border-t-4 border-green-500 transition-all duration-500";
+                status.className = "text-5xl font-black text-center text-green-500";
+                card.className = "bg-gray-800 p-8 rounded-2xl shadow-lg border-t-4 border-green-500 transition-all duration-500";
             }
         }
 
