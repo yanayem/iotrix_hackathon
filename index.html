@@ -1,80 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Parking Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#121212',
+                        darkcard: '#1e1e1e'
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Toggle Switch styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #68D391;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #68D391;
+        }
     </style>
 </head>
-<body class="bg-white text-gray-800 font-sans">
+<body class="bg-gray-50 dark:bg-darkbg text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+    
     <!-- Gas Alert Banner -->
     <div id="gasBanner" class="hidden bg-red-600 text-white text-center py-3 font-bold text-xl animate-pulse">
         ⚠️ GAS LEAK DETECTED! PLEASE EVACUATE! ⚠️
     </div>
 
-    <div class="min-h-screen flex flex-col items-center p-6">
-        <h1 class="text-4xl font-bold my-8 text-teal-600">Smart Parking System Dashboard</h1>
+    <!-- Header & Navigation -->
+    <header class="bg-white dark:bg-darkcard shadow-md p-4 sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-3xl font-bold text-teal-600 dark:text-teal-400">Smart Parking System</h1>
+            
+            <div class="flex items-center space-x-6">
+                <!-- Navigation Tabs -->
+                <nav class="flex space-x-2">
+                    <button id="tab-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg font-semibold bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200 transition-colors">Dashboard</button>
+                    <button id="tab-history" onclick="switchTab('history')" class="px-4 py-2 rounded-lg font-semibold text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">History & Fees</button>
+                </nav>
 
-        <!-- Slot Status Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-            <!-- Slot A -->
-            <div id="cardA" class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-teal-500 transition-all duration-500 border border-gray-100">
-                <h2 class="text-2xl font-semibold mb-4 text-center">Parking Slot A</h2>
-                <div id="statusA" class="text-5xl font-black text-center text-teal-500">EMPTY</div>
+                <!-- Dark Mode Toggle -->
+                <div class="flex items-center">
+                    <span class="mr-2 text-sm font-medium text-gray-900 dark:text-gray-300">☀️</span>
+                    <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="theme-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-300 ease-in-out z-10 top-0 left-0" style="top: -2px; left: -2px;"/>
+                        <label for="theme-toggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-gray-300">🌙</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto p-6 min-h-screen">
+        
+        <!-- ================= DASHBOARD VIEW ================= -->
+        <div id="view-dashboard" class="flex flex-col items-center">
+            
+            <!-- Slot Status Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+                <div id="cardA" class="bg-white dark:bg-darkcard p-8 rounded-2xl shadow-lg border-t-4 border-teal-500 transition-all duration-500 border border-gray-100 dark:border-gray-800">
+                    <h2 class="text-2xl font-semibold mb-4 text-center">Parking Slot A</h2>
+                    <div id="statusA" class="text-5xl font-black text-center text-teal-500">EMPTY</div>
+                </div>
+
+                <div id="cardB" class="bg-white dark:bg-darkcard p-8 rounded-2xl shadow-lg border-t-4 border-teal-500 transition-all duration-500 border border-gray-100 dark:border-gray-800">
+                    <h2 class="text-2xl font-semibold mb-4 text-center">Parking Slot B</h2>
+                    <div id="statusB" class="text-5xl font-black text-center text-teal-500">EMPTY</div>
+                </div>
             </div>
 
-            <!-- Slot B -->
-            <div id="cardB" class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-teal-500 transition-all duration-500 border border-gray-100">
-                <h2 class="text-2xl font-semibold mb-4 text-center">Parking Slot B</h2>
-                <div id="statusB" class="text-5xl font-black text-center text-teal-500">EMPTY</div>
+            <!-- Live Info Cards -->
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-4xl">
+                <div class="bg-white dark:bg-darkcard p-6 rounded-xl text-center shadow-md border border-gray-100 dark:border-gray-800 transition-colors">
+                    <p class="text-teal-600 dark:text-teal-400 uppercase text-sm font-bold tracking-wider">Free Slots</p>
+                    <p id="freeSlots" class="text-4xl font-bold text-teal-500">2</p>
+                    <p class="text-xs text-gray-500 mt-1">out of 2 total</p>
+                </div>
+                <div class="bg-white dark:bg-darkcard p-6 rounded-xl text-center shadow-md border border-gray-100 dark:border-gray-800 transition-colors">
+                    <p class="text-teal-600 dark:text-teal-400 uppercase text-sm font-bold tracking-wider">Gate Status</p>
+                    <p id="gateStatus" class="text-4xl font-bold text-red-500">CLOSED</p>
+                </div>
+                <div class="bg-white dark:bg-darkcard p-6 rounded-xl text-center shadow-md border border-gray-100 dark:border-gray-800 transition-colors">
+                    <p class="text-teal-600 dark:text-teal-400 uppercase text-sm font-bold tracking-wider">System Status</p>
+                    <p id="systemStatus" class="text-2xl font-bold text-teal-500">ONLINE</p>
+                </div>
+            </div>
+
+            <!-- Live Activity Log -->
+            <div class="mt-12 w-full max-w-4xl">
+                <h3 class="text-2xl font-bold mb-4 text-teal-600 dark:text-teal-400">Live Entry Logs</h3>
+                <div class="bg-white dark:bg-darkcard rounded-2xl shadow-xl overflow-x-auto border border-gray-100 dark:border-gray-800 transition-colors">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-teal-50 dark:bg-teal-900/30">
+                            <tr>
+                                <th class="p-4 font-semibold text-teal-800 dark:text-teal-300">Time</th>
+                                <th class="p-4 font-semibold text-teal-800 dark:text-teal-300">Card ID</th>
+                                <th class="p-4 font-semibold text-teal-800 dark:text-teal-300">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody">
+                            <!-- Logs will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Live Info Cards -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
-            <div class="bg-white p-6 rounded-xl text-center shadow-md border border-gray-100">
-                <p class="text-teal-600 uppercase text-sm font-bold tracking-wider">Free Slots</p>
-                <p id="freeSlots" class="text-4xl font-bold text-teal-500">2</p>
-                <p class="text-xs text-gray-500 mt-1">out of 2 total</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl text-center shadow-md border border-gray-100">
-                <p class="text-teal-600 uppercase text-sm font-bold tracking-wider">Gate Status</p>
-                <p id="gateStatus" class="text-4xl font-bold text-red-500">CLOSED</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl text-center shadow-md border border-gray-100">
-                <p class="text-teal-600 uppercase text-sm font-bold tracking-wider">System Status</p>
-                <p id="systemStatus" class="text-2xl font-bold text-teal-500">ONLINE</p>
+        <!-- ================= HISTORY VIEW ================= -->
+        <div id="view-history" class="hidden flex flex-col items-center">
+            <div class="w-full max-w-4xl">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold text-teal-600 dark:text-teal-400">Access History & Fees</h2>
+                    <!-- Search & Filter -->
+                    <div class="relative w-full sm:w-64">
+                        <input type="text" id="searchInput" placeholder="Search Card ID or Date..." class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-darkcard focus:ring-2 focus:ring-teal-500 outline-none transition-colors shadow-sm">
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-darkcard rounded-2xl shadow-xl overflow-x-auto border border-gray-100 dark:border-gray-800 transition-colors">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-teal-50 dark:bg-teal-900/30 border-b border-gray-200 dark:border-gray-700">
+                            <tr>
+                                <th class="p-4 font-semibold text-teal-800 dark:text-teal-300">Entry Time</th>
+                                <th class="p-4 font-semibold text-teal-800 dark:text-teal-300">Exit Time</th>
+                                <th class="p-4 font-semibold text-teal-800 dark:text-teal-300">Card ID</th>
+                                <th class="p-4 font-semibold text-teal-800 dark:text-teal-300">Duration</th>
+                                <th class="p-4 font-semibold text-teal-800 dark:text-teal-300">Fee ($5/hr)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- History logs injected here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Live Activity Log -->
-        <div class="mt-12 w-full max-w-4xl">
-            <h3 class="text-2xl font-bold mb-4 text-teal-600">Live Entry Logs</h3>
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-                <table class="w-full text-left">
-                    <thead class="bg-teal-50">
-                        <tr>
-                            <th class="p-4 font-semibold text-teal-800">Time</th>
-                            <th class="p-4 font-semibold text-teal-800">Card ID</th>
-                            <th class="p-4 font-semibold text-teal-800">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logTableBody">
-                        <!-- Logs will be injected here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
     <!-- Notification Toast -->
-    <div id="notification" class="fixed bottom-10 right-10 transform translate-y-20 transition-transform duration-500 bg-teal-600 text-white p-4 rounded-lg shadow-2xl flex items-center space-x-3 pointer-events-none opacity-0">
+    <div id="notification" class="fixed bottom-10 right-10 transform translate-y-20 transition-transform duration-500 bg-teal-600 text-white p-4 rounded-lg shadow-2xl flex items-center space-x-3 pointer-events-none opacity-0 z-50">
         <div class="bg-white text-teal-600 rounded-full p-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -87,42 +166,83 @@
     </div>
 
     <script>
-        // --- FIREBASE CONFIGURATION ---
-        // Replace with your actual Firebase config
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "your-project-id.firebaseapp.com",
-            databaseURL: "https://iotrix-hackathon-d0919-default-rtdb.firebaseio.com/",
-            projectId: "your-project-id",
-            storageBucket: "your-project-id.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+        // --- THEME TOGGLE LOGIC ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
 
-        // Initialize Firebase
+        // Check local storage or system preference
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+            themeToggle.checked = true;
+        }
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // --- TAB NAVIGATION LOGIC ---
+        function switchTab(tab) {
+            const dashboardBtn = document.getElementById('tab-dashboard');
+            const historyBtn = document.getElementById('tab-history');
+            const dashboardView = document.getElementById('view-dashboard');
+            const historyView = document.getElementById('view-history');
+
+            if (tab === 'dashboard') {
+                dashboardView.classList.remove('hidden');
+                historyView.classList.add('hidden');
+                
+                dashboardBtn.classList.add('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
+                dashboardBtn.classList.remove('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
+                
+                historyBtn.classList.remove('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
+                historyBtn.classList.add('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
+            } else {
+                dashboardView.classList.add('hidden');
+                historyView.classList.remove('hidden');
+
+                historyBtn.classList.add('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
+                historyBtn.classList.remove('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
+                
+                dashboardBtn.classList.remove('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
+                dashboardBtn.classList.add('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
+                
+                renderHistory();
+            }
+        }
+
+        // --- FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            databaseURL: "https://iotrix-hackathon-d0919-default-rtdb.firebaseio.com/"
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Variables for Notification tracking
         let lastEntryTime = 0;
+        let allLogs = [];
 
         // Listen for Real-time updates
         db.ref('parking').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // 1. Update Slots
+                // Update Slots
                 updateSlot('statusA', 'cardA', data.slotA);
                 updateSlot('statusB', 'cardB', data.slotB);
 
-                // 2. Update Gate Status
+                // Update Gate Status
                 const gate = document.getElementById('gateStatus');
                 gate.innerText = data.gateOpen ? "OPEN" : "CLOSED";
-                gate.className = `text-4xl font-bold ${data.gateOpen ? 'text-green-500' : 'text-red-500'}`;
+                gate.className = `text-4xl font-bold ${data.gateOpen ? 'text-teal-500' : 'text-red-500'}`;
 
-                // 3. Update Free Slots Count
+                // Update Free Slots Count
                 document.getElementById('freeSlots').innerText = data.freeSlots;
 
-                // 4. Gas Alert Warning Banner
+                // Gas Alert Warning Banner
                 const gasBanner = document.getElementById('gasBanner');
                 if (data.gasAlert) {
                     gasBanner.classList.remove('hidden');
@@ -130,35 +250,19 @@
                     gasBanner.classList.add('hidden');
                 }
 
-                // 5. Live Notification for RFID Entry
+                // Live Notification for RFID Entry
                 if (data.recentEntry && data.recentEntry.timestamp > lastEntryTime) {
-                    showNotification(`Car (ID: ${data.recentEntry.cardID}) entered the lot!`);
+                    showNotification(`Car (ID: ${data.recentEntry.cardID}) ${data.recentEntry.type === 'exit' ? 'exited' : 'entered'}!`);
                     lastEntryTime = data.recentEntry.timestamp;
                 }
 
-                // 6. Update Activity Logs Table
+                // Update Logs
                 if (data.logs) {
-                    const logBody = document.getElementById('logTableBody');
-                    logBody.innerHTML = '';
-
-                    // Convert logs object to array and sort by time (assuming time is a string or number)
-                    // For better sorting, use a timestamp if available
-                    const logsArray = Object.values(data.logs).reverse().slice(0, 10); // Show last 10
-
-                    logsArray.forEach(log => {
-                        const row = document.createElement('tr');
-                        row.className = "border-t border-gray-100 hover:bg-teal-50 transition-colors fade-in";
-                        row.innerHTML = `
-                            <td class="p-4 text-gray-600">${log.time}</td>
-                            <td class="p-4 font-mono text-gray-700">${log.cardID}</td>
-                            <td class="p-4">
-                                <span class="px-2 py-1 rounded text-xs font-bold ${log.status === 'allowed' ? 'bg-teal-100 text-teal-700' : 'bg-red-100 text-red-700'}">
-                                    ${log.status.toUpperCase()}
-                                </span>
-                            </td>
-                        `;
-                        logBody.appendChild(row);
-                    });
+                    allLogs = Object.values(data.logs).sort((a,b) => b.timestamp - a.timestamp);
+                    renderDashboardLogs();
+                    if (!document.getElementById('view-history').classList.contains('hidden')) {
+                        renderHistory();
+                    }
                 }
             }
         });
@@ -166,23 +270,126 @@
         function updateSlot(statusId, cardId, isOccupied) {
             const status = document.getElementById(statusId);
             const card = document.getElementById(cardId);
-
             if (isOccupied) {
                 status.innerText = "OCCUPIED";
                 status.className = "text-5xl font-black text-center text-red-500";
-                card.className = "bg-white p-8 rounded-2xl shadow-lg border-t-4 border-red-500 transition-all duration-500 border border-gray-100";
+                card.classList.add('border-red-500');
+                card.classList.remove('border-teal-500');
             } else {
                 status.innerText = "EMPTY";
                 status.className = "text-5xl font-black text-center text-teal-500";
-                card.className = "bg-white p-8 rounded-2xl shadow-lg border-t-4 border-teal-500 transition-all duration-500 border border-gray-100";
+                card.classList.add('border-teal-500');
+                card.classList.remove('border-red-500');
             }
         }
+
+        function renderDashboardLogs() {
+            const logBody = document.getElementById('logTableBody');
+            logBody.innerHTML = '';
+            const recentLogs = allLogs.slice(0, 5); // Show last 5
+            
+            recentLogs.forEach(log => {
+                const row = document.createElement('tr');
+                row.className = "border-t border-gray-100 dark:border-gray-800 hover:bg-teal-50 dark:hover:bg-gray-800 transition-colors fade-in";
+                row.innerHTML = `
+                    <td class="p-4 text-gray-600 dark:text-gray-400">${log.time}</td>
+                    <td class="p-4 font-mono text-gray-700 dark:text-gray-300">${log.cardID}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded text-xs font-bold ${log.status === 'allowed' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-200' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'}">
+                            ${log.status.toUpperCase()} ${log.type === 'exit' ? '(EXIT)' : ''}
+                        </span>
+                    </td>
+                `;
+                logBody.appendChild(row);
+            });
+        }
+
+        function calculateFeeAndDuration(entryTimestamp, exitTimestamp) {
+            if (!exitTimestamp) return { durationStr: "Active", fee: "$0.00" };
+            const diffMs = exitTimestamp - entryTimestamp;
+            const diffHrs = diffMs / (1000 * 60 * 60);
+            
+            // Format duration
+            const hours = Math.floor(diffHrs);
+            const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const durationStr = `${hours}h ${mins}m`;
+            
+            // Calculate fee ($5 per hour)
+            const fee = (Math.max(1, diffHrs) * 5).toFixed(2); // Minimum 1 hr charge
+            return { durationStr, fee: "$" + fee };
+        }
+
+        function renderHistory() {
+            const historyBody = document.getElementById('historyTableBody');
+            historyBody.innerHTML = '';
+            
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            // Process logs to pair entries and exits
+            const sessions = {};
+            const completedSessions = [];
+            
+            // Process from oldest to newest to build sessions
+            const sortedAsc = [...allLogs].sort((a,b) => a.timestamp - b.timestamp);
+            
+            sortedAsc.forEach(log => {
+                if (log.status !== 'allowed') return; // Only calculate for allowed entries
+                
+                if (log.type === 'exit') {
+                    if (sessions[log.cardID]) {
+                        sessions[log.cardID].exitTime = log.time;
+                        sessions[log.cardID].exitTimestamp = log.timestamp;
+                        completedSessions.push(sessions[log.cardID]);
+                        delete sessions[log.cardID];
+                    }
+                } else {
+                    // Entry
+                    sessions[log.cardID] = {
+                        cardID: log.cardID,
+                        entryTime: log.time,
+                        entryTimestamp: log.timestamp,
+                        exitTime: null,
+                        exitTimestamp: null
+                    };
+                }
+            });
+            
+            // Add remaining active sessions
+            Object.values(sessions).forEach(session => completedSessions.push(session));
+            
+            // Sort by newest entry first
+            completedSessions.sort((a,b) => b.entryTimestamp - a.entryTimestamp);
+            
+            // Filter and render
+            completedSessions.forEach(session => {
+                if (searchTerm && !session.cardID.toLowerCase().includes(searchTerm) && !session.entryTime.toLowerCase().includes(searchTerm)) {
+                    return;
+                }
+                
+                const { durationStr, fee } = calculateFeeAndDuration(session.entryTimestamp, session.exitTimestamp);
+                
+                const row = document.createElement('tr');
+                row.className = "border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors";
+                row.innerHTML = `
+                    <td class="p-4 text-gray-600 dark:text-gray-400">${session.entryTime}</td>
+                    <td class="p-4 text-gray-600 dark:text-gray-400">${session.exitTime || '<span class="text-teal-500 font-semibold">Currently Parked</span>'}</td>
+                    <td class="p-4 font-mono text-gray-700 dark:text-gray-300">${session.cardID}</td>
+                    <td class="p-4 text-gray-700 dark:text-gray-300">${durationStr}</td>
+                    <td class="p-4 font-bold text-gray-800 dark:text-gray-200">${fee}</td>
+                `;
+                historyBody.appendChild(row);
+            });
+        }
+
+        // Search listener
+        document.getElementById('searchInput').addEventListener('input', renderHistory);
 
         function showNotification(message) {
             const notif = document.getElementById('notification');
             const text = document.getElementById('notifText');
-
             text.innerText = message;
+            
+            // Reset animations
             notif.classList.remove('translate-y-20', 'opacity-0');
             notif.classList.add('translate-y-0', 'opacity-100');
 
