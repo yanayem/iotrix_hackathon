@@ -581,12 +581,11 @@ void networkTask(void *pvParameters) {
       xSemaphoreGive(dataMutex);
     }
 
-    // WiFi reconnect
+    // WiFi check
     if (millis() - lastWiFiCheck >= wifiCheckInterval) {
       lastWiFiCheck = millis();
       if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("WiFi disconnected. Reconnecting...");
-        WiFi.reconnect();
+        Serial.println("WiFi disconnected. Waiting for auto-reconnect...");
       }
     }
 
