@@ -404,6 +404,10 @@ void setup() {
     "Connecting to WiFi..."
   );
 
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
   WiFi.begin(
     WIFI_SSID,
     WIFI_PASSWORD
