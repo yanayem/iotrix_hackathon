@@ -18,6 +18,36 @@
 #include <ESP32Servo.h>
 
 #include <Firebase_ESP_Client.h>
+#include <WebServer.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+
+WebServer server(80);
+SemaphoreHandle_t dataMutex;
+TaskHandle_t NetworkTaskHandle;
+TaskHandle_t SensorTaskHandle;
+
+String getLocalDashboardHTML() {
+  String html = "<!DOCTYPE html><html><head><title>ESP32 Local Dashboard</title>";
+  html += "<style>body{font-family:sans-serif;background:#f0f2f5;text-align:center;padding:20px;}";
+  html += ".card{background:white;padding:20px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1);margin-bottom:20px;}";
+  html += "</style></head><body>";
+  html += "<h1>ESP32 Live Dashboard</h1><div class='card'><h2>Sensors</h2>";
+  xSemaphoreTake(dataMutex, portMAX_DELAY);
+  bool sa = slotAOccupied;
+  bool sb = slotBOccupied;
+  bool gd = gasDanger;
+  bool fd = fireDetected;
+  xSemaphoreGive(dataMutex);
+  html += "<p>Slot A: <b>" + String(sa ? "OCCUPIED" : "EMPTY") + "</b></p>";
+  html += "<p>Slot B: <b>" + String(sb ? "OCCUPIED" : "EMPTY") + "</b></p>";
+  html += "<p>Gas Alert: <b style='color:" + String(gd ? "red" : "green") + "'>" + String(gd ? "DANGER" : "NORMAL") + "</b></p>";
+  html += "<p>Fire Alert: <b style='color:" + String(fd ? "red" : "green") + "'>" + String(fd ? "DANGER" : "NORMAL") + "</b></p>";
+  html += "</div></body></html>";
+  return html;
+}
+
 
 
 // =====================================================
@@ -505,9 +535,15 @@ void setup() {
   updateNormalOLED();
 
 
+  
+  dataMutex = xSemaphoreCreateMutex();
+  xTaskCreatePinnedToCore(networkTask, "NetworkTask", 10000, NULL, 1, &NetworkTaskHandle, 0);
+  xTaskCreatePinnedToCore(sensorTask, "SensorTask", 10000, NULL, 1, &SensorTaskHandle, 1);
+  
   Serial.println(
     "Waiting for RFID card..."
   );
+
 
   Serial.println(
     "================================"
@@ -519,7 +555,40 @@ void setup() {
 // MAIN LOOP
 // =====================================================
 
-void loop() {
+
+// =====================================================
+// NETWORK TASK (Core 0)
+// =====================================================
+void networkTask(void *pvParameters) {
+  server.on("/", HTTP_GET, []() {
+    server.send(200, "text/html", getLocalDashboardHTML());
+  });
+  server.begin();
+
+  for(;;) {
+    server.handleClient();
+    
+    if (millis() - lastWiFiCheck >= wifiCheckInterval) {
+      lastWiFiCheck = millis();
+      if (WiFi.status() != WL_CONNECTED) { // WiFi.reconnect(); // Handled by networkTask }
+    }
+
+    if (millis() - lastFirebaseUpdate >= firebaseInterval) {
+      lastFirebaseUpdate = millis();
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
+      // sendDataToFirebase(); // Handled by networkTask
+      xSemaphoreGive(dataMutex);
+    }
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
+
+// =====================================================
+// SENSOR TASK (Core 1)
+// =====================================================
+void sensorTask(void *pvParameters) {
+  for(;;) {
+
 
   unsigned long currentMillis =
     millis();
@@ -755,7 +824,7 @@ void loop() {
       currentMillis;
 
 
-    sendDataToFirebase();
+    // sendDataToFirebase(); // Handled by networkTask
   }
 
 
@@ -782,10 +851,16 @@ void loop() {
         "WiFi disconnected. Reconnecting..."
       );
 
-      WiFi.reconnect();
+      // WiFi.reconnect(); // Handled by networkTask
     }
   }
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
 }
+
+void loop() { vTaskDelete(NULL); }
+
+
 
 
 // =====================================================
