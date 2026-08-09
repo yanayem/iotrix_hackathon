@@ -31,6 +31,7 @@ We are proud to announce that our team, **Next Gen Innovators**, secured the **1
 - **Project Presentation (Slide):** [Canva Link](https://www.canva.com/design/DAHRmhz0IVc/W53ZB-pR_pm0v3IXTGx-jQ/edit)
 - **Project Development Journey (Video):** [Google Drive Link](https://drive.google.com/drive/folders/1gjPSIcO_C57IRj_9_ykD4r7I6sPcKRLW)
 - **Detailed Project Report:** [OneDrive Link](https://onedrive.live.com/:w:/g/personal/d9b964f88f5b5a7d/IQDNyAkKpUWzRZBbPr4i5HnjAeHuG0xLBmq0QfCfam8Ay3A?rtime=CwWITiH23kg&redeem=aHR0cHM6Ly8xZHJ2Lm1zL3cvYy9kOWI5NjRmODhmNWI1YTdkL0lRRE55QWtLcFVXelJaQmJQcjRpNUhuakFlSHVHMHhMQm1xMFFmQ2ZhbThBeTNB)
+- **Official Challenge Task Sheet:** [PDF Link](assets/IoTrix_hackathon_problemsets.pdf)
 
 ---
 
