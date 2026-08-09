@@ -35,9 +35,9 @@
 </head>
 <body class="bg-gray-50 dark:bg-darkbg text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
     
-    <!-- Gas Alert Banner -->
-    <div id="gasBanner" class="hidden bg-red-600 text-white text-center py-3 font-bold text-xl animate-pulse">
-        ⚠️ GAS LEAK DETECTED! PLEASE EVACUATE! ⚠️
+    <!-- Alert Banner -->
+    <div id="alertBanner" class="hidden bg-red-600 text-white text-center py-3 font-bold text-xl animate-pulse sticky top-0 z-[60]">
+        ⚠️ ALERT DETECTED! ⚠️
     </div>
 
     <!-- Header & Navigation -->
@@ -97,6 +97,24 @@
                 <div class="bg-white dark:bg-darkcard p-6 rounded-xl text-center shadow-md border border-gray-100 dark:border-gray-800 transition-colors">
                     <p class="text-teal-600 dark:text-teal-400 uppercase text-sm font-bold tracking-wider">System Status</p>
                     <p id="systemStatus" class="text-2xl font-bold text-teal-500">ONLINE</p>
+                </div>
+            </div>
+
+            <!-- Safety Sensors Status -->
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-4xl">
+                <div id="gasCard" class="bg-white dark:bg-darkcard p-6 rounded-xl flex items-center justify-between shadow-md border border-gray-100 dark:border-gray-800 transition-colors">
+                    <div class="flex items-center space-x-4">
+                        <div id="gasIndicator" class="w-4 h-4 rounded-full bg-teal-500"></div>
+                        <p class="text-teal-600 dark:text-teal-400 uppercase text-sm font-bold tracking-wider">Gas Sensor</p>
+                    </div>
+                    <p id="gasStatusText" class="text-xl font-bold text-teal-500">NORMAL</p>
+                </div>
+                <div id="fireCard" class="bg-white dark:bg-darkcard p-6 rounded-xl flex items-center justify-between shadow-md border border-gray-100 dark:border-gray-800 transition-colors">
+                    <div class="flex items-center space-x-4">
+                        <div id="fireIndicator" class="w-4 h-4 rounded-full bg-teal-500"></div>
+                        <p class="text-teal-600 dark:text-teal-400 uppercase text-sm font-bold tracking-wider">Flame Sensor</p>
+                    </div>
+                    <p id="fireStatusText" class="text-xl font-bold text-teal-500">NORMAL</p>
                 </div>
             </div>
 
@@ -227,28 +245,44 @@
         let allLogs = [];
 
         // Listen for Real-time updates
-        db.ref('parking').on('value', (snapshot) => {
+        db.ref('/').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Update Slots
-                updateSlot('statusA', 'cardA', data.slotA);
-                updateSlot('statusB', 'cardB', data.slotB);
+                // Update Slots - matching your DB structure
+                updateSlot('statusA', 'cardA', data.slotA && (data.slotA.status === 'OCCUPIED' || data.slotA === true));
+                updateSlot('statusB', 'cardB', data.slotB && (data.slotB.status === 'OCCUPIED' || data.slotB === true));
 
                 // Update Gate Status
                 const gate = document.getElementById('gateStatus');
-                gate.innerText = data.gateOpen ? "OPEN" : "CLOSED";
-                gate.className = `text-4xl font-bold ${data.gateOpen ? 'text-teal-500' : 'text-red-500'}`;
+                const isGateOpen = data.gateOpen || (data.gate && data.gate.status === 'OPEN');
+                gate.innerText = isGateOpen ? "OPEN" : "CLOSED";
+                gate.className = `text-4xl font-bold ${isGateOpen ? 'text-teal-500' : 'text-red-500'}`;
 
                 // Update Free Slots Count
                 document.getElementById('freeSlots').innerText = data.freeSlots;
 
-                // Gas Alert Warning Banner
-                const gasBanner = document.getElementById('gasBanner');
-                if (data.gasAlert) {
-                    gasBanner.classList.remove('hidden');
+                // Multi-Alert Warning Banner (Task 6)
+                const alertBanner = document.getElementById('alertBanner');
+                let alertMsg = "";
+
+                const isGasAlert = data.gasAlert || (data.safety && data.safety.gas && data.safety.gas.alert);
+                const isFireAlert = data.fireAlert || (data.safety && data.safety.fire && data.safety.fire.alert);
+                const isUnauthorized = data.recentEntry && data.recentEntry.status === 'denied';
+
+                if (isFireAlert) alertMsg = "⚠️ FIRE DETECTED! PLEASE EVACUATE! ⚠️";
+                else if (isGasAlert) alertMsg = "⚠️ GAS LEAK DETECTED! PLEASE EVACUATE! ⚠️";
+                else if (isUnauthorized) alertMsg = "⚠️ UNAUTHORIZED RFID ACCESS DETECTED! ⚠️";
+
+                if (alertMsg) {
+                    alertBanner.innerText = alertMsg;
+                    alertBanner.classList.remove('hidden');
                 } else {
-                    gasBanner.classList.add('hidden');
+                    alertBanner.classList.add('hidden');
                 }
+
+                // Update Safety Status Cards (Task 6)
+                updateSafetyCard('gasIndicator', 'gasStatusText', isGasAlert);
+                updateSafetyCard('fireIndicator', 'fireStatusText', isFireAlert);
 
                 // Live Notification for RFID Entry
                 if (data.recentEntry && data.recentEntry.timestamp > lastEntryTime) {
@@ -266,6 +300,20 @@
                 }
             }
         });
+
+        function updateSafetyCard(indicatorId, textId, isAlert) {
+            const indicator = document.getElementById(indicatorId);
+            const text = document.getElementById(textId);
+            if (isAlert) {
+                indicator.className = "w-4 h-4 rounded-full bg-red-500 animate-ping";
+                text.innerText = "ALERT";
+                text.className = "text-xl font-bold text-red-500";
+            } else {
+                indicator.className = "w-4 h-4 rounded-full bg-teal-500";
+                text.innerText = "NORMAL";
+                text.className = "text-xl font-bold text-teal-500";
+            }
+        }
 
         function updateSlot(statusId, cardId, isOccupied) {
             const status = document.getElementById(statusId);
