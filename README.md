@@ -1,6 +1,6 @@
 # Smart Parking System - IoTriX Hackathon
 
-![Project Overview](assets/IMG_8480.HEIC)
+![Project Overview](assets/IMG_8480.jpg)
 
 ## 🏆 Achievement: 1st Runner Up
 We are proud to announce that our team, **Next Gen Innovators**, secured the **1st Runner Up** position in the **IoTriX Hackathon**!
@@ -40,26 +40,26 @@ We are proud to announce that our team, **Next Gen Innovators**, secured the **1
 
 #### Task 1: Parking Slot Occupancy Detection
 Using 2× IR sensors to detect if Slot A or Slot B is full.
-![Task 1](assets/IMG_8517.HEIC)
+![Task 1](assets/IMG_8517.jpg)
 
 #### Task 2: RFID-Controlled Entry Gate
 Servo-motor-based gate that opens only for valid RFID cards, provided there is space available.
-![Task 2](assets/IMG_8508.HEIC)
+![Task 2](assets/IMG_8508.jpg)
 
 #### Task 3: Entrance OLED Display
 Live status and welcome messages shown on a 0.96″ OLED screen for drivers.
-![Task 3](assets/IMG_8522.HEIC)
+![Task 3](assets/IMG_8522.jpg)
 
 ### Part II: IoT & Web
 
 #### Task 4: Firebase Integration (Gas & Fire Safety)
 Real-time monitoring of MQ Gas and Fire sensors with automatic cloud alerts.
-![Task 4](assets/IMG_8555.HEIC)
+![Task 4](assets/IMG_8555.jpg)
 
 #### Task 5: Live Web Dashboard
 Responsive UI showing real-time slot status, history logs, and emergency banners.
 ![UI Task 5](assets/Screenshot%202026-08-09%20202833.png)
-![Task 5-7 Hardware](assets/IMG_8578.HEIC)
+![Task 5-7 Hardware](assets/IMG_8578.jpg)
 
 #### Task 6: Smart IoT Security (FreeRTOS)
 Multi-core execution on ESP32 using FreeRTOS for simultaneous sensor monitoring and web communication.
