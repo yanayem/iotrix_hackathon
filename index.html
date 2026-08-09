@@ -20,6 +20,9 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <!-- TensorFlow.js for AI Object Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <style>
         .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -35,11 +38,6 @@
 </head>
 <body class="bg-gray-50 dark:bg-darkbg text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
     
-    <!-- Alert Banner -->
-    <div id="alertBanner" class="hidden bg-red-600 text-white text-center py-3 font-bold text-xl animate-pulse sticky top-0 z-[60]">
-        ⚠️ ALERT DETECTED! ⚠️
-    </div>
-
     <!-- Header & Navigation -->
     <header class="bg-white dark:bg-darkcard shadow-md p-4 sticky top-0 z-50 transition-colors duration-300">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
@@ -49,6 +47,7 @@
                 <!-- Navigation Tabs -->
                 <nav class="flex space-x-2">
                     <button id="tab-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg font-semibold bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200 transition-colors">Dashboard</button>
+                    <button id="tab-ai" onclick="switchTab('ai')" class="px-4 py-2 rounded-lg font-semibold text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">AI Camera</button>
                     <button id="tab-history" onclick="switchTab('history')" class="px-4 py-2 rounded-lg font-semibold text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">History & Fees</button>
                 </nav>
 
@@ -64,6 +63,11 @@
             </div>
         </div>
     </header>
+
+    <!-- Alert Banner (Moved under Navigation) -->
+    <div id="alertBanner" class="hidden bg-red-600 text-white text-center py-3 font-bold text-xl animate-pulse sticky top-[72px] md:top-[68px] z-40">
+        ⚠️ ALERT DETECTED! ⚠️
+    </div>
 
     <div class="max-w-6xl mx-auto p-6 min-h-screen">
         
@@ -138,6 +142,57 @@
             </div>
         </div>
 
+        <!-- ================= AI CAMERA VIEW ================= -->
+        <div id="view-ai" class="hidden flex flex-col items-center">
+            <div class="w-full max-w-4xl bg-white dark:bg-darkcard p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold text-teal-600 dark:text-teal-400">AI Parking Assistant</h2>
+                    <div class="flex gap-2">
+                        <button id="startCamBtn" onclick="startCamera()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-bold transition-colors">Start Camera</button>
+                        <button id="stopCamBtn" onclick="stopCamera()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition-colors hidden">Stop Camera</button>
+                    </div>
+                </div>
+
+                <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-inner">
+                    <video id="video" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline muted></video>
+                    <canvas id="canvas" class="absolute inset-0 w-full h-full object-cover"></canvas>
+                    <div id="modelStatus" class="absolute top-4 left-4 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                        Loading Model...
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-teal-50 dark:bg-teal-900/20 rounded-xl border border-teal-100 dark:border-teal-800">
+                        <h3 class="font-bold text-teal-800 dark:text-teal-200 mb-2">AI Detection Results</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>AI Slot A:</span>
+                                <span id="aiSlotA" class="font-bold text-teal-600">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>AI Slot B:</span>
+                                <span id="aiSlotB" class="font-bold text-teal-600">--</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-teal-200 dark:border-teal-700">
+                                <span>Total Vehicles Counted:</span>
+                                <span id="aiVehicleCount" class="font-bold text-teal-600">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-2">Instructions</h3>
+                        <ul class="text-sm text-gray-600 dark:text-gray-400 list-disc list-inside space-y-1">
+                            <li>Position your camera to view the parking lot.</li>
+                            <li>The AI will detect vehicles and track them.</li>
+                            <li>Detection is compared with hardware IR sensors.</li>
+                            <li>Keep the tab active for continuous monitoring.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ================= HISTORY VIEW ================= -->
         <div id="view-history" class="hidden flex flex-col items-center">
             <div class="w-full max-w-4xl">
@@ -170,8 +225,8 @@
 
     </div>
 
-    <!-- Notification Toast -->
-    <div id="notification" class="fixed bottom-10 right-10 transform translate-y-20 transition-transform duration-500 bg-teal-600 text-white p-4 rounded-lg shadow-2xl flex items-center space-x-3 pointer-events-none opacity-0 z-50">
+    <!-- Notification Toast (Moved to left side) -->
+    <div id="notification" class="fixed bottom-10 left-10 transform -translate-x-20 transition-transform duration-500 bg-teal-600 text-white p-4 rounded-lg shadow-2xl flex items-center space-x-3 pointer-events-none opacity-0 z-50">
         <div class="bg-white text-teal-600 rounded-full p-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -207,29 +262,36 @@
         // --- TAB NAVIGATION LOGIC ---
         function switchTab(tab) {
             const dashboardBtn = document.getElementById('tab-dashboard');
+            const aiBtn = document.getElementById('tab-ai');
             const historyBtn = document.getElementById('tab-history');
+
             const dashboardView = document.getElementById('view-dashboard');
+            const aiView = document.getElementById('view-ai');
             const historyView = document.getElementById('view-history');
+
+            // Reset all buttons
+            [dashboardBtn, aiBtn, historyBtn].forEach(btn => {
+                btn.classList.remove('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
+                btn.classList.add('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
+            });
+
+            // Hide all views
+            dashboardView.classList.add('hidden');
+            aiView.classList.add('hidden');
+            historyView.classList.add('hidden');
 
             if (tab === 'dashboard') {
                 dashboardView.classList.remove('hidden');
-                historyView.classList.add('hidden');
-                
                 dashboardBtn.classList.add('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
                 dashboardBtn.classList.remove('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
-                
-                historyBtn.classList.remove('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
-                historyBtn.classList.add('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
+            } else if (tab === 'ai') {
+                aiView.classList.remove('hidden');
+                aiBtn.classList.add('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
+                aiBtn.classList.remove('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
             } else {
-                dashboardView.classList.add('hidden');
                 historyView.classList.remove('hidden');
-
                 historyBtn.classList.add('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
                 historyBtn.classList.remove('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
-                
-                dashboardBtn.classList.remove('bg-teal-100', 'text-teal-800', 'dark:bg-teal-900', 'dark:text-teal-200');
-                dashboardBtn.classList.add('text-gray-500', 'hover:bg-gray-100', 'dark:text-gray-400', 'dark:hover:bg-gray-800');
-                
                 renderHistory();
             }
         }
@@ -249,8 +311,8 @@
             const data = snapshot.val();
             if (data) {
                 // Update Slots - matching your DB structure
-                updateSlot('statusA', 'cardA', data.slotA && (data.slotA.status === 'OCCUPIED' || data.slotA === true));
-                updateSlot('statusB', 'cardB', data.slotB && (data.slotB.status === 'OCCUPIED' || data.slotB === true));
+                updateSlot('statusA', 'cardA', data.slotA && (data.slotA.status === 'OCCUPIED' || data.slotA === true), data.ai_monitoring ? data.ai_monitoring.slotA === 'OCCUPIED' : null);
+                updateSlot('statusB', 'cardB', data.slotB && (data.slotB.status === 'OCCUPIED' || data.slotB === true), data.ai_monitoring ? data.ai_monitoring.slotB === 'OCCUPIED' : null);
 
                 // Update Gate Status
                 const gate = document.getElementById('gateStatus');
@@ -315,9 +377,11 @@
             }
         }
 
-        function updateSlot(statusId, cardId, isOccupied) {
+        function updateSlot(statusId, cardId, isOccupied, aiOccupied) {
             const status = document.getElementById(statusId);
             const card = document.getElementById(cardId);
+
+            // IR Status update
             if (isOccupied) {
                 status.innerText = "OCCUPIED";
                 status.className = "text-5xl font-black text-center text-red-500";
@@ -328,6 +392,25 @@
                 status.className = "text-5xl font-black text-center text-teal-500";
                 card.classList.add('border-teal-500');
                 card.classList.remove('border-red-500');
+            }
+
+            // AI Cross-Reference Badge (Task 8)
+            let badge = card.querySelector('.ai-badge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = "ai-badge mt-2 text-xs font-bold text-center px-2 py-1 rounded-full uppercase tracking-tighter";
+                card.appendChild(badge);
+            }
+
+            if (aiOccupied === null) {
+                badge.innerText = "AI Offline";
+                badge.className = "ai-badge mt-2 text-xs font-bold text-center px-2 py-1 rounded-full uppercase tracking-tighter bg-gray-100 text-gray-500 dark:bg-gray-800";
+            } else if (isOccupied === aiOccupied) {
+                badge.innerText = "✓ AI Verified";
+                badge.className = "ai-badge mt-2 text-xs font-bold text-center px-2 py-1 rounded-full uppercase tracking-tighter bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+            } else {
+                badge.innerText = "⚠ AI Conflict";
+                badge.className = "ai-badge mt-2 text-xs font-bold text-center px-2 py-1 rounded-full uppercase tracking-tighter bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
             }
         }
 
@@ -438,13 +521,153 @@
             text.innerText = message;
             
             // Reset animations
-            notif.classList.remove('translate-y-20', 'opacity-0');
-            notif.classList.add('translate-y-0', 'opacity-100');
+            notif.classList.remove('-translate-x-20', 'opacity-0');
+            notif.classList.add('translate-x-0', 'opacity-100');
 
             setTimeout(() => {
-                notif.classList.add('translate-y-20', 'opacity-0');
-                notif.classList.remove('translate-y-0', 'opacity-100');
+                notif.classList.add('-translate-x-20', 'opacity-0');
+                notif.classList.remove('translate-x-0', 'opacity-100');
             }, 5000);
+        }
+
+        // --- AI CAMERA & OBJECT DETECTION ---
+        let model = undefined;
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let stream = null;
+        let isModelLoaded = false;
+        let aiVehicleCount = 0;
+        let detectedVehicles = new Set();
+
+        // Load COCO-SSD Model
+        cocoSsd.load().then(lmodel => {
+            model = lmodel;
+            isModelLoaded = true;
+            document.getElementById('modelStatus').innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> AI Model Ready';
+        });
+
+        async function startCamera() {
+            if (!isModelLoaded) {
+                alert("Please wait for the AI model to load.");
+                return;
+            }
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: false
+                });
+                video.srcObject = stream;
+                document.getElementById('startCamBtn').classList.add('hidden');
+                document.getElementById('stopCamBtn').classList.remove('hidden');
+
+                // Adjust canvas size to match video
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    predictWebcam();
+                };
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+                alert("Could not access camera. Make sure you are using HTTPS and have given permission.");
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                document.getElementById('startCamBtn').classList.remove('hidden');
+                document.getElementById('stopCamBtn').classList.add('hidden');
+            }
+        }
+
+        async function predictWebcam() {
+            if (!stream || !video.srcObject) return;
+
+            const predictions = await model.detect(video);
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Define Virtual Slots (example coordinates)
+            const slotA = { x: 50, y: 50, w: canvas.width/2 - 75, h: canvas.height - 100 };
+            const slotB = { x: canvas.width/2 + 25, y: 50, w: canvas.width/2 - 75, h: canvas.height - 100 };
+
+            // Draw Slots
+            drawSlot(slotA, "Slot A", "rgba(20, 184, 166, 0.3)");
+            drawSlot(slotB, "Slot B", "rgba(20, 184, 166, 0.3)");
+
+            let slotAOccupied = false;
+            let slotBOccupied = false;
+            let currentFrameVehicles = 0;
+
+            predictions.forEach(prediction => {
+                if (['car', 'truck', 'motorcycle', 'bus'].includes(prediction.class)) {
+                    currentFrameVehicles++;
+                    const [x, y, width, height] = prediction.bbox;
+
+                    // Draw detection box
+                    ctx.strokeStyle = "#10b981";
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(x, y, width, height);
+                    ctx.fillStyle = "#10b981";
+                    ctx.font = "18px Arial";
+                    ctx.fillText(`${prediction.class} (${Math.round(prediction.score * 100)}%)`, x, y > 20 ? y - 5 : 10);
+
+                    // Check if vehicle is in Slot A
+                    if (isInside(x, y, width, height, slotA)) slotAOccupied = true;
+                    // Check if vehicle is in Slot B
+                    if (isInside(x, y, width, height, slotB)) slotBOccupied = true;
+                }
+            });
+
+            // Update UI
+            updateAiStatus('aiSlotA', slotAOccupied);
+            updateAiStatus('aiSlotB', slotBOccupied);
+
+            // Simple Counter Logic: If vehicles in frame > current count, increment
+            if (currentFrameVehicles > aiVehicleCount) {
+                aiVehicleCount = currentFrameVehicles;
+                document.getElementById('aiVehicleCount').innerText = aiVehicleCount;
+            }
+
+            // Sync with Firebase
+            db.ref('ai_monitoring').set({
+                slotA: slotAOccupied ? 'OCCUPIED' : 'EMPTY',
+                slotB: slotBOccupied ? 'OCCUPIED' : 'EMPTY',
+                totalVehicles: aiVehicleCount,
+                lastUpdated: Date.now()
+            });
+
+            // Recursive call for next frame
+            if (stream && video.srcObject) {
+                window.requestAnimationFrame(predictWebcam);
+            }
+        }
+
+        function drawSlot(slot, label, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+            ctx.strokeStyle = "#14b8a6";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
+            ctx.fillStyle = "#14b8a6";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText(label, slot.x + 10, slot.y + 30);
+        }
+
+        function isInside(vx, vy, vw, vh, slot) {
+            // Check if center of vehicle box is within slot bounds
+            const cx = vx + vw / 2;
+            const cy = vy + vh / 2;
+            return cx > slot.x && cx < slot.x + slot.w && cy > slot.y && cy < slot.y + slot.h;
+        }
+
+        function updateAiStatus(elementId, isOccupied) {
+            const el = document.getElementById(elementId);
+            el.innerText = isOccupied ? "OCCUPIED" : "EMPTY";
+            el.className = `font-bold ${isOccupied ? 'text-red-500' : 'text-teal-600'}`;
         }
     </script>
 </body>

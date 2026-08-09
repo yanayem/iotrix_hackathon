@@ -1,75 +1,93 @@
-# User Manual: Smart Parking System
+# Smart Parking System - IoTriX Hackathon
 
-Welcome to the **Smart Parking System** user manual. This document provides instructions on how to use, set up, and maintain the system.
+![Project Overview](assets/IMG_8480.HEIC)
 
----
+## 🏆 Achievement: 1st Runner Up
+We are proud to announce that our team, **Next Gen Innovators**, secured the **1st Runner Up** position in the **IoTriX Hackathon**!
 
-## 1. Introduction
-The Smart Parking System is an IoT-based solution designed to manage parking spaces efficiently. It uses an ESP32 microcontroller for real-time monitoring of parking slots and a web-based dashboard for live data visualization and user interaction.
-
----
-
-## 2. Dashboard Interface Guide
-The web dashboard is the primary interface for users and administrators.
-
-### 2.1 Dashboard Overview
-*   **Parking Slots (Slot A & Slot B):** Large colored cards indicate the current status of each slot.
-    *   **GREEN (EMPTY):** The slot is available for parking.
-    *   **RED (OCCUPIED):** The slot is currently taken.
-*   **Live Info Cards:**
-    *   **Free Slots:** Displays the total number of available parking spaces.
-    *   **Gate Status:** Shows if the entry gate is currently **OPEN** or **CLOSED**.
-    *   **System Status:** Indicates if the system is **ONLINE** and connected to the database.
-
-### 2.2 Live Notifications
-*   When a car enters the parking lot after a successful RFID scan, a notification toast will appear at the bottom right of the screen.
-
-### 2.3 Live Entry Logs
-*   The table at the bottom shows a history of recent access attempts.
-*   **Time:** The timestamp of the event.
-*   **Card ID:** The unique ID of the scanned RFID card.
-*   **Status:** Indicates whether access was **ALLOWED** or **DENIED**.
-
-### 2.4 Gas Alert System (Emergency)
-*   If the system detects a gas leak, a **flashing red banner** will appear at the top of the dashboard with the message: `⚠️ GAS LEAK DETECTED! PLEASE EVACUATE! ⚠️`.
+![Winning Moment](assets/DSC03650.JPG)
 
 ---
 
-## 3. Administrator & Setup Guide
+## 👥 Team: Next Gen Innovators
+**Department:** Computer Science and Engineering (CSE), BUBT
+**Organized By:** IEEE BUBT Student Branch  
+**University:** BANGLADESH UNIVERSITY OF BUSINESS AND TECHNOLOGY (BUBT)
 
-### 3.1 Software Requirements
-*   A modern web browser (Chrome, Firefox, Edge, etc.).
-*   Arduino IDE (for flashing the ESP32 firmware).
-*   A Firebase project (Realtime Database).
-
-### 3.2 Firebase Configuration
-To connect the dashboard to your data:
-1.  Open `index.html` in a text editor.
-2.  Locate the `firebaseConfig` object (around line 90).
-3.  Replace the placeholder values (`YOUR_API_KEY`, `your-project-id`, etc.) with your actual Firebase credentials.
-
-### 3.3 Hardware Setup
-*   **Microcontroller:** ESP32.
-*   **Sensors:** 
-    *   IR/Ultrasonic sensors for Slot A (Pin 18) and Slot B (Pin 19).
-    *   Gas Sensor (Pin 34).
-    *   RFID-RC522 Module for entry control.
-*   **Actuator:** Servo motor (Pin 26) for the gate.
-*   **Firmware:** Flash `ESP32_Parking_Firebase.ino` to the ESP32. Ensure you update the `WIFI_SSID`, `WIFI_PASSWORD`, `FIREBASE_HOST`, and `FIREBASE_AUTH` in the code.
+| Name | ID | Role |
+| :--- | :--- | :--- |
+| [**Yacin Arafat**](https://github.com/yanayem) | 20245103160 | Leader & Software |
+| [**Dipta Dey**](https://github.com/diptadey768) | 20245103143 | Hardware Assembly & Video Content Lead |
+| [**Sayma Rahman Eva**](https://github.com/esaymarahman) | 20245103060 | Documentation |
+| [**Taspiya Jannat Prottasha**](https://github.com/Jannat651) | 20245103057 | Documentation & Presentation |
+| [**Nabiha Naz**](https://github.com/nabihanaz26) | 20245103061 | Hardware Engineer |
+| [**Nafisa Akter**](https://github.com/nafisabindu21) | 20245103042 | Circuit Design |
+| [**Mijanur Rahman**](https://github.com/mijanurrahman0645) | 20245103053 | Software |
 
 ---
 
-## 4. Operational Workflow
-1.  **Entry:** The driver scans their RFID card at the gate.
-2.  **Validation:** The system checks if the card is valid and if there are free slots.
-3.  **Gate Operation:** If valid, the gate opens for 5 seconds and then automatically closes.
-4.  **Live Update:** The dashboard immediately updates the "Gate Status" and adds an entry to the "Live Entry Logs".
-5.  **Parking:** Once the car parks, the corresponding Slot Card on the dashboard turns red.
+## 🔗 Project Links
+- **Live Web App:** [https://iotrix-hackathon.web.app/](https://iotrix-hackathon.web.app/)
+- **Project Presentation (Slide):** [Canva Link](https://www.canva.com/design/DAHRmhz0IVc/W53ZB-pR_pm0v3IXTGx-jQ/edit)
+- **Project Development Journey (Video):** [Google Drive Link](https://drive.google.com/drive/folders/1gjPSIcO_C57IRj_9_ykD4r7I6sPcKRLW)
+- **Detailed Project Report:** [OneDrive Link](https://onedrive.live.com/:w:/g/personal/d9b964f88f5b5a7d/IQDNyAkKpUWzRZBbPr4i5HnjAeHuG0xLBmq0QfCfam8Ay3A?rtime=CwWITiH23kg&redeem=aHR0cHM6Ly8xZHJ2Lm1zL3cvYy9kOWI5NjRmODhmNWI1YTdkL0lRRE55QWtLcFVXelJaQmJQcjRpNUhuakFlSHVHMHhMQm1xMFFmQ2ZhbThBeTNB)
 
 ---
 
-## 5. Troubleshooting
-*   **Dashboard shows "OFFLINE":** Check your internet connection and ensure your Firebase database is active.
-*   **Slots not updating:** Check the wiring of the sensors on the ESP32 and ensure the ESP32 is connected to Wi-Fi.
-*   **Gate not opening:** Ensure the Servo motor has sufficient power and the RFID card UID matches the `validUID` in the firmware.
-*   **Gas Alert stuck on:** Check the sensitivity threshold of your gas sensor in the firmware (currently set to 400).
+## 🛠️ Project Tasks & Implementation
+
+### Part I: Hardware
+
+#### Task 1: Parking Slot Occupancy Detection
+Using 2× IR sensors to detect if Slot A or Slot B is full.
+![Task 1](assets/IMG_8517.HEIC)
+
+#### Task 2: RFID-Controlled Entry Gate
+Servo-motor-based gate that opens only for valid RFID cards, provided there is space available.
+![Task 2](assets/IMG_8508.HEIC)
+
+#### Task 3: Entrance OLED Display
+Live status and welcome messages shown on a 0.96″ OLED screen for drivers.
+![Task 3](assets/IMG_8522.HEIC)
+
+### Part II: IoT & Web
+
+#### Task 4: Firebase Integration (Gas & Fire Safety)
+Real-time monitoring of MQ Gas and Fire sensors with automatic cloud alerts.
+![Task 4](assets/IMG_8555.HEIC)
+
+#### Task 5: Live Web Dashboard
+Responsive UI showing real-time slot status, history logs, and emergency banners.
+![UI Task 5](assets/Screenshot%202026-08-09%20202833.png)
+![Task 5-7 Hardware](assets/IMG_8578.HEIC)
+
+#### Task 6: Smart IoT Security (FreeRTOS)
+Multi-core execution on ESP32 using FreeRTOS for simultaneous sensor monitoring and web communication.
+![UI Task 6](assets/Screenshot%202026-08-09%20203008.png)
+
+#### Task 7: Advanced Dashboard Features
+Search/filter history, parking fee calculation, and Dark/Light mode toggle.
+![UI Task 7](assets/Screenshot%202026-08-09%20202940.png)
+
+### Part III: AI (Bonus)
+
+#### Task 8: AI Vehicle Counting & Slot Detection
+Real-time AI object detection (TensorFlow.js) using a phone camera to cross-verify physical sensor data.
+![UI Task 8](assets/Screenshot%202026-08-09%20203058.png)
+
+#### Task 9: Documentation & Presentation
+Detailed system architecture and a 7-minute project demonstration video.
+
+---
+
+## 📦 Hardware Kit
+- ESP32-WROOM-32
+- 2× IR Sensors
+- MQ Gas Sensor
+- Fire Sensor
+- SG90 Servo Motor
+- RFID-RC522 Reader + Cards
+- 0.96″ OLED Screen
+
+---
+*Developed for IoTriX Hackathon | Organized by IEEE BUBT Student Branch*
