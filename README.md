@@ -17,12 +17,12 @@ We are proud to announce that our team, **Next Gen Innovators**, secured the **1
 | Name | ID | Role |
 | :--- | :--- | :--- |
 | [**Yacin Arafat**](https://github.com/yanayem) | 20245103160 | Leader & Software |
-| [**Dipta Dey**](https://github.com/diptadey768) | 20245103143 | Hardware Assembly & Video Content Lead |
-| [**Sayma Rahman Eva**](https://github.com/esaymarahman) | 20245103060 | Documentation |
+| [**Dipta Dey**](https://github.com/Dipto-04) | 20245103143 | Hardware Assembly & Video Content Lead |
+| [**Sayma Rahman Eva**](https://github.com/evasayma) | 20245103060 | Documentation |
 | [**Taspiya Jannat Prottasha**](https://github.com/Jannat651) | 20245103057 | Documentation & Presentation |
-| [**Nabiha Naz**](https://github.com/nabihanaz26) | 20245103061 | Hardware Engineer |
-| [**Nafisa Akter**](https://github.com/nafisabindu21) | 20245103042 | Circuit Design |
-| [**Mijanur Rahman**](https://github.com/mijanurrahman0645) | 20245103053 | Software |
+| [**Nabiha Naz**](https://github.com/nabiha26) | 20245103061 | Hardware Engineer |
+| [**Nafisa Akter**](https://github.com/nafisabindu) | 20245103042 | Circuit Design |
+| [**Mijanur Rahman**](https://github.com/Mijanur-Rahman0) | 20245103053 | Software |
 
 ---
 
